@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-fixed min-h-screen text-slate-100;
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 25%, #4338ca 50%, #4f46e5 75%, #6366f1 100%);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+.glass-effect {
+  @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-xl;
+}
+
+.glass-card {
+  @apply glass-effect rounded-2xl p-6 transition-all duration-300 hover:bg-white/20;
+}
+
+.glass-input {
+  @apply bg-white/5 border border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white/10 transition-all;
+}
+
+.glass-button {
+  @apply bg-indigo-600/80 hover:bg-indigo-500 backdrop-blur-sm px-6 py-2 rounded-lg font-semibold transition-all shadow-lg active:scale-95 disabled:opacity-50;
+}

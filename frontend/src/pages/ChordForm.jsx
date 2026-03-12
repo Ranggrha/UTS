@@ -1,110 +1,134 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import api from '../api/axios';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import api from '../api';
+import { ArrowLeft, Save, Loader2, Music, User, AlignLeft } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const ChordForm = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const isEdit = Boolean(id);
+
   const [formData, setFormData] = useState({
     title: '',
     artist: '',
     chords_lyrics: '',
   });
   const [loading, setLoading] = useState(false);
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const [fetching, setFetching] = useState(isEdit);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    if (id) {
-      fetchChord();
+    if (isEdit) {
+      api.get(`/chords/${id}`)
+        .then((res) => setFormData(res.data.data))
+        .catch((err) => {
+          console.error(err);
+          navigate('/');
+        })
+        .finally(() => setFetching(false));
     }
-  }, [id]);
-
-  const fetchChord = async () => {
-    try {
-      const response = await api.get(`/chords/${id}`);
-      setFormData(response.data);
-    } catch (err) {
-      alert('Failed to fetch chord details');
-      navigate('/');
-    }
-  };
+  }, [id, isEdit, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrors({});
+
     try {
-      if (id) {
+      if (isEdit) {
         await api.put(`/chords/${id}`, formData);
       } else {
         await api.post('/chords', formData);
       }
       navigate('/');
     } catch (err) {
-      alert('Failed to save chord');
+      if (err.response?.status === 422) {
+        setErrors(err.response.data.errors);
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  if (fetching) return <div className="text-center py-20 animate-pulse">Loading chord data...</div>;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-6 flex items-center justify-center">
-      <div className="w-full max-w-2xl bg-white bg-opacity-10 backdrop-blur-xl border border-white border-opacity-20 p-8 rounded-3xl shadow-2xl">
-        <h2 className="text-3xl font-bold text-white mb-8 text-center">
-          {id ? 'Edit Secret Chord' : 'New Chord Vault Entry'}
-        </h2>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-4xl mx-auto"
+    >
+      <div className="mb-6 flex items-center justify-between">
+        <Link to="/" className="flex items-center text-indigo-300 hover:text-white transition-colors group">
+          <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
+          <span>Back to Vault</span>
+        </Link>
+        <h1 className="text-2xl font-bold">{isEdit ? 'Edit Song Chord' : 'Add New Chord'}</h1>
+      </div>
+
+      <div className="glass-card">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-white text-sm font-medium mb-2">Song Title</label>
+            <div className="space-y-2">
+              <label className="flex items-center text-sm font-medium text-indigo-200">
+                <Music className="w-4 h-4 mr-2" />
+                Song Title
+              </label>
               <input
                 type="text"
+                className="glass-input w-full"
+                placeholder="e.g. Bohemian Rhapsody"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full bg-white bg-opacity-10 border border-white border-opacity-20 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-purple-400 transition-all"
-                placeholder="Enter title..."
-                required
               />
+              {errors.title && <p className="text-rose-400 text-xs mt-1">{errors.title[0]}</p>}
             </div>
-            <div>
-              <label className="block text-white text-sm font-medium mb-2">Artist Name</label>
+
+            <div className="space-y-2">
+              <label className="flex items-center text-sm font-medium text-indigo-200">
+                <User className="w-4 h-4 mr-2" />
+                Artist / Band
+              </label>
               <input
                 type="text"
+                className="glass-input w-full"
+                placeholder="e.g. Queen"
                 value={formData.artist}
                 onChange={(e) => setFormData({ ...formData, artist: e.target.value })}
-                className="w-full bg-white bg-opacity-10 border border-white border-opacity-20 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-purple-400 transition-all"
-                placeholder="Enter artist..."
-                required
               />
+              {errors.artist && <p className="text-rose-400 text-xs mt-1">{errors.artist[0]}</p>}
             </div>
           </div>
-          <div>
-            <label className="block text-white text-sm font-medium mb-2">Chords & Lyrics</label>
+
+          <div className="space-y-2">
+            <label className="flex items-center text-sm font-medium text-indigo-200">
+              <AlignLeft className="w-4 h-4 mr-2" />
+              Chords & Lyrics
+            </label>
             <textarea
+              className="glass-input w-full h-80 font-mono text-sm leading-relaxed"
+              placeholder="[G] Is this the real life? [C] Is this just fantasy?..."
               value={formData.chords_lyrics}
               onChange={(e) => setFormData({ ...formData, chords_lyrics: e.target.value })}
-              className="w-full h-64 bg-white bg-opacity-10 border border-white border-opacity-20 rounded-xl py-3 px-4 text-white font-mono focus:ring-2 focus:ring-purple-400 transition-all resize-none"
-              placeholder="[C] Lyric here..."
-              required
             />
+            {errors.chords_lyrics && <p className="text-rose-400 text-xs mt-1">{errors.chords_lyrics[0]}</p>}
+            <p className="text-[10px] text-white/30 uppercase tracking-widest">Tip: Use brackets [C] for chords to distinguish from lyrics.</p>
           </div>
-          <div className="flex gap-4">
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-              className="flex-1 bg-white bg-opacity-10 hover:bg-opacity-20 text-white font-bold py-3 rounded-xl transition-all border border-white border-opacity-20"
-            >
-              Cancel
-            </button>
+
+          <div className="flex justify-end pt-4">
             <button
               type="submit"
               disabled={loading}
-              className="flex-[2] bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-3 rounded-xl shadow-lg transition-all transform active:scale-95 disabled:opacity-50"
+              className="glass-button flex items-center space-x-2 px-8"
             >
-              {loading ? 'Securing Data...' : (id ? 'Update Chord' : 'Store in Vault')}
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+              <span>{isEdit ? 'Update' : 'Save'} Chord</span>
             </button>
           </div>
         </form>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
