@@ -1,135 +1,95 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import api from '../api';
-import { ArrowLeft, Save, Loader2, Music, User, AlignLeft } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 const ChordForm = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const isEdit = Boolean(id);
+    const [formData, setFormData] = useState({ title: '', artist: '', chords_lyrics: '' });
+    const [errors, setErrors] = useState({});
+    const navigate = useNavigate();
+    const { id } = useParams();
 
-  const [formData, setFormData] = useState({
-    title: '',
-    artist: '',
-    chords_lyrics: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(isEdit);
-  const [errors, setErrors] = useState({});
+    useEffect(() => {
+        if (id) {
+            api.get(`/chords/${id}`)
+                .then(res => setFormData(res.data.data))
+                .catch(err => console.error(err));
+        }
+    }, [id]);
 
-  useEffect(() => {
-    if (isEdit) {
-      api.get(`/chords/${id}`)
-        .then((res) => setFormData(res.data.data))
-        .catch((err) => {
-          console.error(err);
-          navigate('/');
-        })
-        .finally(() => setFetching(false));
-    }
-  }, [id, isEdit, navigate]);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            if (id) {
+                await api.put(`/chords/${id}`, formData);
+            } else {
+                await api.post('/chords', formData);
+            }
+            navigate('/');
+        } catch (err) {
+            setErrors(err.response?.data || { message: 'Failed to save chord' });
+        }
+    };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrors({});
+    return (
+        <div className="min-h-screen pt-32 px-6 bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 flex justify-center pb-12">
+            <div className="w-full max-w-2xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl">
+                <h2 className="text-3xl font-bold text-white mb-8">
+                    {id ? '✏️ Edit Chord' : '✨ Add New Chord'}
+                </h2>
 
-    try {
-      if (isEdit) {
-        await api.put(`/chords/${id}`, formData);
-      } else {
-        await api.post('/chords', formData);
-      }
-      navigate('/');
-    } catch (err) {
-      if (err.response?.status === 422) {
-        setErrors(err.response.data.errors);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="text-white/70 text-sm ml-2">Song Title</label>
+                            <input
+                                type="text"
+                                className="w-full mt-2 bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                                placeholder="e.g. Bohemian Rhapsody"
+                                value={formData.title}
+                                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                required
+                            />
+                            {errors.title && <p className="text-red-400 text-xs mt-1">{errors.title[0]}</p>}
+                        </div>
+                        <div>
+                            <label className="text-white/70 text-sm ml-2">Artist Name</label>
+                            <input
+                                type="text"
+                                className="w-full mt-2 bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                                placeholder="e.g. Queen"
+                                value={formData.artist}
+                                onChange={(e) => setFormData({...formData, artist: e.target.value})}
+                                required
+                            />
+                            {errors.artist && <p className="text-red-400 text-xs mt-1">{errors.artist[0]}</p>}
+                        </div>
+                    </div>
 
-  if (fetching) return <div className="text-center py-20 animate-pulse">Loading chord data...</div>;
+                    <div>
+                        <label className="text-white/70 text-sm ml-2">Chords & Lyrics</label>
+                        <textarea
+                            className="w-full mt-2 bg-white/5 border border-white/20 rounded-2xl px-4 py-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 font-mono text-sm leading-relaxed"
+                            rows="12"
+                            placeholder="[C] Is this the real life? [Am] Is this just fantasy?"
+                            value={formData.chords_lyrics}
+                            onChange={(e) => setFormData({...formData, chords_lyrics: e.target.value})}
+                            required
+                        ></textarea>
+                        {errors.chords_lyrics && <p className="text-red-400 text-xs mt-1">{errors.chords_lyrics[0]}</p>}
+                    </div>
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl mx-auto"
-    >
-      <div className="mb-6 flex items-center justify-between">
-        <Link to="/" className="flex items-center text-indigo-300 hover:text-white transition-colors group">
-          <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
-          <span>Back to Vault</span>
-        </Link>
-        <h1 className="text-2xl font-bold">{isEdit ? 'Edit Song Chord' : 'Add New Chord'}</h1>
-      </div>
-
-      <div className="glass-card">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="flex items-center text-sm font-medium text-indigo-200">
-                <Music className="w-4 h-4 mr-2" />
-                Song Title
-              </label>
-              <input
-                type="text"
-                className="glass-input w-full"
-                placeholder="e.g. Bohemian Rhapsody"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              />
-              {errors.title && <p className="text-rose-400 text-xs mt-1">{errors.title[0]}</p>}
+                    <div className="flex gap-4 pt-4">
+                        <button type="submit" className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg transition transform hover:-translate-y-1">
+                            {id ? 'Update Chord' : 'Save to Vault'}
+                        </button>
+                        <button type="button" onClick={() => navigate('/')} className="px-8 bg-white/10 hover:bg-white/20 text-white py-4 rounded-xl border border-white/10 transition">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
             </div>
-
-            <div className="space-y-2">
-              <label className="flex items-center text-sm font-medium text-indigo-200">
-                <User className="w-4 h-4 mr-2" />
-                Artist / Band
-              </label>
-              <input
-                type="text"
-                className="glass-input w-full"
-                placeholder="e.g. Queen"
-                value={formData.artist}
-                onChange={(e) => setFormData({ ...formData, artist: e.target.value })}
-              />
-              {errors.artist && <p className="text-rose-400 text-xs mt-1">{errors.artist[0]}</p>}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="flex items-center text-sm font-medium text-indigo-200">
-              <AlignLeft className="w-4 h-4 mr-2" />
-              Chords & Lyrics
-            </label>
-            <textarea
-              className="glass-input w-full h-80 font-mono text-sm leading-relaxed"
-              placeholder="[G] Is this the real life? [C] Is this just fantasy?..."
-              value={formData.chords_lyrics}
-              onChange={(e) => setFormData({ ...formData, chords_lyrics: e.target.value })}
-            />
-            {errors.chords_lyrics && <p className="text-rose-400 text-xs mt-1">{errors.chords_lyrics[0]}</p>}
-            <p className="text-[10px] text-white/30 uppercase tracking-widest">Tip: Use brackets [C] for chords to distinguish from lyrics.</p>
-          </div>
-
-          <div className="flex justify-end pt-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className="glass-button flex items-center space-x-2 px-8"
-            >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-              <span>{isEdit ? 'Update' : 'Save'} Chord</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </motion.div>
-  );
+        </div>
+    );
 };
 
 export default ChordForm;

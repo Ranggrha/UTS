@@ -1,60 +1,44 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { Music, LogOut, Plus, User as UserIcon } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+    const { user, logout } = useContext(AuthContext);
+    const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/login');
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    const handleLogout = async () => {
+        await logout();
+        navigate('/login');
+    };
 
-  return (
-    <nav className="sticky top-0 z-50 w-full backdrop-blur-md bg-white/10 border-b border-white/20">
-      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <Link to="/" className="flex items-center space-x-2 group">
-          <div className="p-2 bg-indigo-500 rounded-lg group-hover:bg-indigo-400 transition-colors">
-            <Music className="w-6 h-6 text-white" />
-          </div>
-          <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent">
-            Chord Vault
-          </span>
-        </Link>
-
-        {user ? (
-          <div className="flex items-center space-x-6">
-            <Link to="/chords/create" className="flex items-center space-x-1 hover:text-indigo-300 transition-colors">
-              <Plus className="w-4 h-4" />
-              <span>Add Chord</span>
-            </Link>
-            <div className="flex items-center space-x-2 px-3 py-1 bg-white/5 rounded-full border border-white/10">
-              <UserIcon className="w-4 h-4 text-indigo-300" />
-              <span className="text-sm font-medium">{user.name}</span>
+    return (
+        <nav className="fixed top-0 w-full z-50 px-6 py-4">
+            <div className="max-w-7xl mx-auto flex justify-between items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-8 py-3 shadow-lg">
+                <Link to="/" className="text-2xl font-bold text-white drop-shadow-md">
+                    🎸 Chord<span className="text-indigo-300">Vault</span>
+                </Link>
+                
+                <div className="flex gap-6 items-center">
+                    {user ? (
+                        <>
+                            <Link to="/" className="text-white hover:text-indigo-200 transition">Dashboard</Link>
+                            <Link to="/chords/create" className="bg-indigo-500/80 hover:bg-indigo-600 text-white px-4 py-2 rounded-xl transition backdrop-blur-sm">
+                                + New Chord
+                            </Link>
+                            <button onClick={handleLogout} className="text-red-300 hover:text-red-400 transition">Logout</button>
+                        </>
+                    ) : (
+                        <>
+                            <Link to="/login" className="text-white hover:text-indigo-200 transition">Login</Link>
+                            <Link to="/register" className="bg-white/20 hover:bg-white/30 text-white px-5 py-2 rounded-xl transition border border-white/30">
+                                Register
+                            </Link>
+                        </>
+                    )}
+                </div>
             </div>
-            <button
-              onClick={handleLogout}
-              className="p-2 hover:bg-white/10 rounded-full text-rose-400 transition-all hover:scale-110"
-              title="Logout"
-            >
-              <LogOut className="w-5 h-5" />
-            </button>
-          </div>
-        ) : (
-          <div className="flex items-center space-x-4">
-            <Link to="/login" className="px-4 py-2 hover:bg-white/10 rounded-lg transition-all">Login</Link>
-            <Link to="/register" className="glass-button">Register</Link>
-          </div>
-        )}
-      </div>
-    </nav>
-  );
+        </nav>
+    );
 };
 
 export default Navbar;

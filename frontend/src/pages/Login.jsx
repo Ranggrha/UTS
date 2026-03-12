@@ -1,101 +1,65 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, Music, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import React, { useState, useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
-  const navigate = useNavigate();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const { login } = useContext(AuthContext);
+    const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    try {
-      await login(email, password);
-      navigate('/');
-    } catch (err) {
-      setError(err.response?.data?.error || 'Invalid credentials. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await login(email, password);
+            navigate('/');
+        } catch (err) {
+            setError('Invalid email or password');
+        }
+    };
 
-  return (
-    <div className="flex items-center justify-center pt-12">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="glass-card w-full max-w-md p-8"
-      >
-        <div className="flex flex-col items-center mb-8">
-          <div className="p-4 bg-indigo-500 rounded-2xl mb-4 shadow-lg shadow-indigo-500/50">
-            <Music className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold">Welcome Back</h1>
-          <p className="text-indigo-200/50 text-sm mt-1">Sign in to access your chords</p>
+    return (
+        <div className="min-h-screen flex items-center justify-center pt-24 px-4 bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900">
+            <div className="w-full max-w-md p-8 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl">
+                <h2 className="text-3xl font-bold text-white mb-6 text-center">Welcome Back</h2>
+                
+                {error && <div className="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-2 rounded-xl mb-4 text-sm">{error}</div>}
+                
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="text-white/70 text-sm ml-2">Email Address</label>
+                        <input
+                            type="email"
+                            className="w-full mt-1 bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition"
+                            placeholder="you@example.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="text-white/70 text-sm ml-2">Password</label>
+                        <input
+                            type="password"
+                            className="w-full mt-1 bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition"
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <button type="submit" className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 rounded-xl shadow-lg transition transform hover:-translate-y-1">
+                        Sign In
+                    </button>
+                </form>
+                
+                <p className="text-white/60 mt-6 text-center text-sm">
+                    Don't have an account? <Link to="/register" className="text-indigo-300 hover:underline">Register here</Link>
+                </p>
+            </div>
         </div>
-
-        {error && (
-          <div className="mb-6 p-3 bg-rose-500/20 border border-rose-500/30 rounded-lg text-rose-300 text-sm text-center">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-indigo-200 ml-1">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
-              <input
-                type="email"
-                required
-                className="glass-input w-full pl-11"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-indigo-200 ml-1">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
-              <input
-                type="password"
-                required
-                className="glass-input w-full pl-11"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="glass-button w-full flex items-center justify-center space-x-2 py-3"
-          >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>Sign In</span>}
-          </button>
-        </form>
-
-        <p className="mt-8 text-center text-sm text-indigo-200/50">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-indigo-300 hover:text-white font-semibold transition-colors">
-            Register for free
-          </Link>
-        </p>
-      </motion.div>
-    </div>
-  );
+    );
 };
 
 export default Login;

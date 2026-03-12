@@ -1,142 +1,83 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, User, Music, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import React, { useState, useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
-  });
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
-  const navigate = useNavigate();
+    const [formData, setFormData] = useState({ name: '', email: '', password: '', password_confirmation: '' });
+    const [errors, setErrors] = useState({});
+    const { register } = useContext(AuthContext);
+    const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrors({});
-    try {
-      await register(formData.name, formData.email, formData.password, formData.password_confirmation);
-      navigate('/');
-    } catch (err) {
-      if (err.response?.status === 400 || err.response?.status === 422) {
-        setErrors(err.response.data);
-      } else {
-        setErrors({ general: 'Registration failed. Please try again.' });
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await register(formData.name, formData.email, formData.password, formData.password_confirmation);
+            navigate('/');
+        } catch (err) {
+            setErrors(err.response?.data || { message: 'Registration failed' });
+        }
+    };
 
-  return (
-    <div className="flex items-center justify-center pt-8">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="glass-card w-full max-w-md p-8"
-      >
-        <div className="flex flex-col items-center mb-8">
-          <div className="p-4 bg-indigo-500 rounded-2xl mb-4 shadow-lg shadow-indigo-500/50">
-            <Music className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold">Join Chord Vault</h1>
-          <p className="text-indigo-200/50 text-sm mt-1">Start your personal song collection</p>
+    return (
+        <div className="min-h-screen flex items-center justify-center pt-24 px-4 bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900">
+            <div className="w-full max-w-md p-8 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl">
+                <h2 className="text-3xl font-bold text-white mb-6 text-center">Join the Vault</h2>
+                
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="text-white/70 text-sm ml-2">Full Name</label>
+                        <input
+                            type="text"
+                            className="w-full mt-1 bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none"
+                            placeholder="John Doe"
+                            value={formData.name}
+                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        />
+                        {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name[0]}</p>}
+                    </div>
+                    <div>
+                        <label className="text-white/70 text-sm ml-2">Email</label>
+                        <input
+                            type="email"
+                            className="w-full mt-1 bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none"
+                            placeholder="you@example.com"
+                            value={formData.email}
+                            onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        />
+                        {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email[0]}</p>}
+                    </div>
+                    <div>
+                        <label className="text-white/70 text-sm ml-2">Password</label>
+                        <input
+                            type="password"
+                            className="w-full mt-1 bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none"
+                            placeholder="••••••••"
+                            value={formData.password}
+                            onChange={(e) => setFormData({...formData, password: e.target.value})}
+                        />
+                        {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password[0]}</p>}
+                    </div>
+                    <div>
+                        <label className="text-white/70 text-sm ml-2">Confirm Password</label>
+                        <input
+                            type="password"
+                            className="w-full mt-1 bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none"
+                            placeholder="••••••••"
+                            value={formData.password_confirmation}
+                            onChange={(e) => setFormData({...formData, password_confirmation: e.target.value})}
+                        />
+                    </div>
+                    <button type="submit" className="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 rounded-xl shadow-lg transition transform hover:-translate-y-1 mt-4">
+                        Create Account
+                    </button>
+                </form>
+                
+                <p className="text-white/60 mt-6 text-center text-sm">
+                    Already have an account? <Link to="/login" className="text-indigo-300 hover:underline">Sign In</Link>
+                </p>
+            </div>
         </div>
-
-        {errors.general && (
-          <div className="mb-6 p-3 bg-rose-500/20 border border-rose-500/30 rounded-lg text-rose-300 text-sm text-center">
-            {errors.general}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-indigo-200 ml-1 uppercase tracking-wider">Full Name</label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
-              <input
-                type="text"
-                required
-                className="glass-input w-full pl-10 py-2.5"
-                placeholder="John Doe"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-            </div>
-            {errors.name && <p className="text-rose-400 text-[10px] mt-1 ml-1">{errors.name[0]}</p>}
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-indigo-200 ml-1 uppercase tracking-wider">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
-              <input
-                type="email"
-                required
-                className="glass-input w-full pl-10 py-2.5"
-                placeholder="john@example.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
-            </div>
-            {errors.email && <p className="text-rose-400 text-[10px] mt-1 ml-1">{errors.email[0]}</p>}
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-indigo-200 ml-1 uppercase tracking-wider">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
-              <input
-                type="password"
-                required
-                className="glass-input w-full pl-10 py-2.5"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              />
-            </div>
-            {errors.password && <p className="text-rose-400 text-[10px] mt-1 ml-1">{errors.password[0]}</p>}
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-indigo-200 ml-1 uppercase tracking-wider">Confirm Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
-              <input
-                type="password"
-                required
-                className="glass-input w-full pl-10 py-2.5"
-                placeholder="••••••••"
-                value={formData.password_confirmation}
-                onChange={(e) => setFormData({ ...formData, password_confirmation: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="glass-button w-full flex items-center justify-center space-x-2 py-3 mt-4"
-          >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>Create Account</span>}
-          </button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-indigo-200/50">
-          Already have an account?{' '}
-          <Link to="/login" className="text-indigo-300 hover:text-white font-semibold transition-colors">
-            Login
-          </Link>
-        </p>
-      </motion.div>
-    </div>
-  );
+    );
 };
 
 export default Register;
