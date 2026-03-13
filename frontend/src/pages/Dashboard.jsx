@@ -63,11 +63,14 @@ const Dashboard = () => {
                                     <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-slate-900/40 to-transparent"></div>
                                 </div>
 
-                                <div className="flex justify-between items-center gap-4">
+                                <div className="flex flex-wrap justify-between items-center gap-3">
+                                    <Link to={`/chords/${chord.id}`} className="flex-1 text-center bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-xl transition">
+                                        View
+                                    </Link>
                                     <Link to={`/chords/edit/${chord.id}`} className="flex-1 text-center bg-white/10 hover:bg-white/20 text-white py-2 rounded-xl border border-white/10 transition">
                                         Edit
                                     </Link>
-                                    <button onClick={() => handleDelete(chord.id)} className="flex-1 bg-red-500/20 hover:bg-red-500/40 text-red-300 py-2 rounded-xl border border-red-500/30 transition">
+                                    <button onClick={() => handleDelete(chord.id)} className="px-4 bg-red-500/20 hover:bg-red-500/40 text-red-300 py-2 rounded-xl border border-red-500/30 transition">
                                         Delete
                                     </button>
                                 </div>

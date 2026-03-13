@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ChordForm from './pages/ChordForm';
+import ChordPreview from './pages/ChordPreview';
 
 const PrivateRoute = ({ children }) => {
     const { user, loading } = useContext(AuthContext);
@@ -27,6 +28,12 @@ function App() {
                         <Route path="/" element={
                             <PrivateRoute>
                                 <Dashboard />
+                            </PrivateRoute>
+                        } />
+
+                        <Route path="/chords/:id" element={
+                            <PrivateRoute>
+                                <ChordPreview />
                             </PrivateRoute>
                         } />
                         
