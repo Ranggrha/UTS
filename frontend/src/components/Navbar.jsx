@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
     const { user, logout } = useContext(AuthContext);
@@ -60,11 +61,18 @@ const Navbar = () => {
                 </div>
 
                 {/* Mobile Menu */}
-                {isOpen && (
-                    <div className="md:hidden border-t border-white/10 px-6 py-4 flex flex-col gap-4 bg-slate-900/50 rounded-b-2xl">
-                        <NavLinks />
-                    </div>
-                )}
+                <AnimatePresence>
+                    {isOpen && (
+                        <motion.div 
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="md:hidden border-t border-white/10 px-6 py-4 flex flex-col gap-4 bg-slate-900/50 rounded-b-2xl overflow-hidden"
+                        >
+                            <NavLinks />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </nav>
     );
