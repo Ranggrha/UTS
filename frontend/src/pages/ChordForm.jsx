@@ -31,14 +31,14 @@ const ChordForm = () => {
     };
 
     return (
-        <div className="min-h-screen pt-32 px-6 bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 flex justify-center pb-12">
-            <div className="w-full max-w-2xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 shadow-2xl">
-                <h2 className="text-3xl font-bold text-white mb-8">
+        <div className="min-h-screen pt-28 md:pt-32 px-4 md:px-6 bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 flex justify-center pb-12">
+            <div className="w-full max-w-2xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 md:p-8 shadow-2xl">
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 md:mb-8">
                     {id ? '✏️ Edit Chord' : '✨ Add New Chord'}
                 </h2>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div>
                             <label className="text-white/70 text-sm ml-2">Song Title</label>
                             <input

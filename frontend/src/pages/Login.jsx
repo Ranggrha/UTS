@@ -21,8 +21,8 @@ const Login = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center pt-24 px-4 bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900">
-            <div className="w-full max-w-md p-8 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl">
-                <h2 className="text-3xl font-bold text-white mb-6 text-center">Welcome Back</h2>
+            <div className="w-full max-w-md p-6 md:p-8 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl">
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 text-center">Welcome Back</h2>
                 
                 {error && <div className="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-2 rounded-xl mb-4 text-sm">{error}</div>}
                 
