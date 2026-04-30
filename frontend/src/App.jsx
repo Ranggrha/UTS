@@ -4,6 +4,7 @@ import { AuthProvider, AuthContext } from './context/AuthContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Background from './components/Background';
+import SplashScreen from './components/SplashScreen';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -19,6 +20,7 @@ const PrivateRoute = ({ children }) => {
 
 const AnimatedRoutes = () => {
     const location = useLocation();
+
     return (
         <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
@@ -69,17 +71,29 @@ const AnimatedRoutes = () => {
     );
 };
 
+const AppContent = () => {
+    const { loading } = useContext(AuthContext);
+
+    if (loading) {
+        return <SplashScreen />;
+    }
+
+    return (
+        <div className="min-h-screen relative overflow-x-hidden">
+            <Background />
+            <div className="relative z-10">
+                <Navbar />
+                <AnimatedRoutes />
+            </div>
+        </div>
+    );
+};
+
 function App() {
     return (
         <AuthProvider>
             <Router>
-                <div className="min-h-screen relative overflow-x-hidden">
-                    <Background />
-                    <div className="relative z-10">
-                        <Navbar />
-                        <AnimatedRoutes />
-                    </div>
-                </div>
+                <AppContent />
             </Router>
         </AuthProvider>
     );

@@ -30,6 +30,13 @@ class AuthProvider extends ChangeNotifier {
 
       if (token == null) {
         _status = AuthStatus.unauthenticated;
+      } else if (token == 'dummy_token_for_local_testing') {
+        _user = User(
+          id: 999,
+          name: 'Local Test User',
+          email: 'local@gmail.com',
+        );
+        _status = AuthStatus.authenticated;
       } else {
         final response = await ApiClient.get(AppConstants.meEndpoint);
         _user = User.fromJson(response['user'] as Map<String, dynamic>);
@@ -53,6 +60,22 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // Dummy user for local testing
+      if (email == 'local@gmail.com' && password == 'local123') {
+        const token = 'dummy_token_for_local_testing';
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(AppConstants.tokenKey, token);
+
+        _user = User(
+          id: 999,
+          name: 'Local Test User',
+          email: 'local@gmail.com',
+        );
+        _status = AuthStatus.authenticated;
+        notifyListeners();
+        return true;
+      }
+
       final response = await ApiClient.post(
         AppConstants.loginEndpoint,
         {'email': email, 'password': password},

@@ -6,16 +6,21 @@ import { motion } from 'framer-motion';
 const Register = () => {
     const [formData, setFormData] = useState({ name: '', email: '', password: '', password_confirmation: '' });
     const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false);
     const { register } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setErrors({});
         try {
             await register(formData.name, formData.email, formData.password, formData.password_confirmation);
             navigate('/');
         } catch (err) {
-            setErrors(err.response?.data || { message: 'Registration failed' });
+            setErrors(err.response?.data?.errors || { message: ['Registration failed'] });
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -34,55 +39,65 @@ const Register = () => {
                         <motion.input
                             whileFocus={{ scale: 1.01, boxShadow: "0 0 20px rgba(168, 85, 247, 0.2)" }}
                             type="text"
-                            className="w-full mt-1 bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                            className="w-full mt-1 bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all disabled:opacity-50"
                             placeholder="John Doe"
                             value={formData.name}
                             onChange={(e) => setFormData({...formData, name: e.target.value})}
+                            disabled={loading}
                         />
-                        {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name[0]}</p>}
+                        {errors.name && <p className="text-red-400 text-xs mt-1 ml-2">{errors.name[0]}</p>}
                     </div>
                     <div>
                         <label className="text-white/70 text-sm ml-2">Email</label>
                         <motion.input
                             whileFocus={{ scale: 1.01, boxShadow: "0 0 20px rgba(168, 85, 247, 0.2)" }}
                             type="email"
-                            className="w-full mt-1 bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                            className="w-full mt-1 bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all disabled:opacity-50"
                             placeholder="you@example.com"
                             value={formData.email}
                             onChange={(e) => setFormData({...formData, email: e.target.value})}
+                            disabled={loading}
                         />
-                        {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email[0]}</p>}
+                        {errors.email && <p className="text-red-400 text-xs mt-1 ml-2">{errors.email[0]}</p>}
                     </div>
                     <div>
                         <label className="text-white/70 text-sm ml-2">Password</label>
                         <motion.input
                             whileFocus={{ scale: 1.01, boxShadow: "0 0 20px rgba(168, 85, 247, 0.2)" }}
                             type="password"
-                            className="w-full mt-1 bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                            className="w-full mt-1 bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all disabled:opacity-50"
                             placeholder="••••••••"
                             value={formData.password}
                             onChange={(e) => setFormData({...formData, password: e.target.value})}
+                            disabled={loading}
                         />
-                        {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password[0]}</p>}
+                        {errors.password && <p className="text-red-400 text-xs mt-1 ml-2">{errors.password[0]}</p>}
                     </div>
                     <div>
                         <label className="text-white/70 text-sm ml-2">Confirm Password</label>
                         <motion.input
                             whileFocus={{ scale: 1.01, boxShadow: "0 0 20px rgba(168, 85, 247, 0.2)" }}
                             type="password"
-                            className="w-full mt-1 bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                            className="w-full mt-1 bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all disabled:opacity-50"
                             placeholder="••••••••"
                             value={formData.password_confirmation}
                             onChange={(e) => setFormData({...formData, password_confirmation: e.target.value})}
+                            disabled={loading}
                         />
                     </div>
                     <motion.button 
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                        whileHover={!loading ? { scale: 1.02 } : {}}
+                        whileTap={!loading ? { scale: 0.98 } : {}}
                         type="submit" 
-                        className="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 rounded-xl shadow-lg transition-colors mt-4"
+                        disabled={loading}
+                        className="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 rounded-xl shadow-lg transition-colors mt-4 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                        Create Account
+                        {loading ? (
+                            <>
+                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                Creating Account...
+                            </>
+                        ) : 'Create Account'}
                     </motion.button>
                 </form>
                 

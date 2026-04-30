@@ -1,5 +1,6 @@
 // lib/providers/chord_provider.dart
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/api_client.dart';
 import '../core/constants.dart';
 import '../models/chord.dart';
@@ -20,6 +21,22 @@ class ChordProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getString(AppConstants.tokenKey) == 'dummy_token_for_local_testing') {
+        if (_chords.isEmpty) {
+          _chords = [
+            Chord(
+              id: 1,
+              title: 'Dummy Song',
+              artist: 'Dummy Artist',
+              chordsLyrics: '[C]Hello [G]World',
+              userId: 999,
+            ),
+          ];
+        }
+        return;
+      }
+
       final response = await ApiClient.get(AppConstants.chordsEndpoint);
       final data = response['data'] as List<dynamic>;
       _chords = data
@@ -38,6 +55,15 @@ class ChordProvider extends ChangeNotifier {
   /// Ambil detail satu chord
   Future<Chord?> getChord(int id) async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getString(AppConstants.tokenKey) == 'dummy_token_for_local_testing') {
+        try {
+          return _chords.firstWhere((c) => c.id == id);
+        } catch (_) {
+          return null;
+        }
+      }
+
       final response =
           await ApiClient.get('${AppConstants.chordsEndpoint}/$id');
       return Chord.fromJson(response['data'] as Map<String, dynamic>);
@@ -63,6 +89,19 @@ class ChordProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getString(AppConstants.tokenKey) == 'dummy_token_for_local_testing') {
+        final newChord = Chord(
+          id: DateTime.now().millisecondsSinceEpoch,
+          title: title,
+          artist: artist,
+          chordsLyrics: chordsLyrics,
+          userId: 999,
+        );
+        _chords.insert(0, newChord);
+        return true;
+      }
+
       final response = await ApiClient.post(
         AppConstants.chordsEndpoint,
         {'title': title, 'artist': artist, 'chords_lyrics': chordsLyrics},
@@ -95,6 +134,19 @@ class ChordProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getString(AppConstants.tokenKey) == 'dummy_token_for_local_testing') {
+        final index = _chords.indexWhere((c) => c.id == id);
+        if (index != -1) {
+          _chords[index] = _chords[index].copyWith(
+            title: title,
+            artist: artist,
+            chordsLyrics: chordsLyrics,
+          );
+        }
+        return true;
+      }
+
       final response = await ApiClient.put(
         '${AppConstants.chordsEndpoint}/$id',
         {'title': title, 'artist': artist, 'chords_lyrics': chordsLyrics},
@@ -122,6 +174,13 @@ class ChordProvider extends ChangeNotifier {
   Future<bool> deleteChord(int id) async {
     _errorMessage = null;
     try {
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getString(AppConstants.tokenKey) == 'dummy_token_for_local_testing') {
+        _chords.removeWhere((c) => c.id == id);
+        notifyListeners();
+        return true;
+      }
+
       await ApiClient.delete('${AppConstants.chordsEndpoint}/$id');
       _chords.removeWhere((c) => c.id == id);
       notifyListeners();
